@@ -22,6 +22,9 @@ def rebuild_state(move_history):
 def get_move():
     data = request.json
     move_history = data.get("moves", [])
+    depth = int(data.get("depth", 6))
+    depth = max(1, min(depth, 10))  # clamp 1–10
+    ChessAi.DEPTH = depth
 
     gs = rebuild_state(move_history)
     valid_moves = gs.getValidMoves()
