@@ -3,10 +3,9 @@ from flask_cors import CORS
 import ChessEngine, ChessAi
 
 app = Flask(__name__)
-CORS(app)  # allows browser to call this API
+CORS(app)
 
 def rebuild_state(move_history):
-    """Replay moves from scratch to reconstruct the GameState."""
     gs = ChessEngine.GameState()
     for m in move_history:
         valid = gs.getValidMoves()
@@ -22,7 +21,7 @@ def rebuild_state(move_history):
 @app.route("/move", methods=["POST"])
 def get_move():
     data = request.json
-    move_history = data.get("moves", [])   # list of {sr, sc, er, ec, promo?}
+    move_history = data.get("moves", [])
 
     gs = rebuild_state(move_history)
     valid_moves = gs.getValidMoves()
@@ -45,7 +44,8 @@ def get_move():
             "er": best.endRow,   "ec": best.endCol,
             "promo": best.promotionChoice if best.isPawnPromotion else None,
             "notation": best.getChessNotation()
-        }
+        },
+        "eval": round(ChessAi.lastScore, 2)
     })
 
 @app.route("/health")
