@@ -216,7 +216,27 @@ document.getElementById('sel-wK').src = PIECES.wK;
 document.getElementById('sel-bK').src = PIECES.bK;
 
 // ── App State ─────────────────────────────────────────────────────────────
-const API = 'https://chess-engine-tdt0.onrender.com';
+const API_PRIMARY = 'https://sesame-rhyme-itinerary.ngrok-free.dev';
+const API_FALLBACK = 'https://chess-engine-tdt0.onrender.com';
+let API = API_FALLBACK;
+let apiChecked = false;
+
+async function resolveAPI() {
+  if (apiChecked) return;
+  apiChecked = true;
+  try {
+    const res = await fetch(API_PRIMARY + '/health', {
+      signal: AbortSignal.timeout(3000)
+    });
+    if (res.ok) {
+      API = API_PRIMARY;
+      console.log('Using local PC engine');
+    }
+  } catch(e) {
+    API = API_FALLBACK;
+    console.log('Using Render fallback');
+  }
+}
 let chess = new Chess();
 let playerColor = 'w';
 let moveHistory = [];
@@ -331,6 +351,7 @@ function makePlayerMove(fa,ta,promo) {
 
 // ── AI ────────────────────────────────────────────────────────────────────
 async function requestAIMove() {
+  await resolveAPI();
   thinking=true; setStatus('Thinking','thinking');
   try {
     const res=await fetch(API+'/move',{method:'POST',headers:{'Content-Type':'application/json'},
