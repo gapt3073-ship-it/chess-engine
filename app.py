@@ -40,6 +40,8 @@ def get_move():
     if best is None:
         return jsonify({"error": "no move found"}), 500
 
+    eval_score = ChessAi.lastScore if ChessAi.lastScore != 0 else ChessAi.scoreBoard(gs)
+
     return jsonify({
         "status": "ok",
         "move": {
@@ -48,7 +50,7 @@ def get_move():
             "promo": best.promotionChoice if best.isPawnPromotion else None,
             "notation": best.getChessNotation()
         },
-        "eval": round(ChessAi.lastScore, 2)
+        "eval": round(eval_score, 2)
     })
 
 @app.route("/health")
